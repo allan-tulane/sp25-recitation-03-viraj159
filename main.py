@@ -49,13 +49,44 @@ def quadratic_multiply(x, y):
     return _quadratic_multiply(x,y).decimal_val
 
 def _quadratic_multiply(x, y):
-    ### TODO
-    pass
-    ###
+    # Convert x and y to binary vector
+    xvec = x.binary_vec
+    yvec = y.binary_vec
+
+    # Pad xvec and yvec so they have the same length
+    xvec, yvec = pad(xvec, yvec)
+
+    # Base case: if length is 1, then multiply the single bits
+    if len(xvec) == 1:
+        return BinaryNumber(int(xvec[0]) * int(yvec[0]))
+
+    # Split xvec and yvec into left and right
+    mid = len(xvec) // 2
+    x_left = binary2int(xvec[:mid])
+    x_right = binary2int(xvec[mid:])
+    y_left = binary2int(yvec[:mid])
+    y_right = binary2int(yvec[mid:])
+
+    # Recursively compute products
+    A = _quadratic_multiply(x_left, y_left)    
+    B = _quadratic_multiply(x_left, y_right)  
+    C = _quadratic_multiply(x_right, y_left)  
+    D = _quadratic_multiply(x_right, y_right)
+
+    # Combine results
+    n = len(xvec)
+    A_shifted = bit_shift(A, n)
+
+    # Shift (B + C) by n/2 bits
+    BC_sum = BinaryNumber(B.decimal_val + C.decimal_val)
+    BC_shifted = bit_shift(BC_sum, n // 2)
+
+    # Final results
+    result = A_shifted.decimal_val + BC_shifted.decimal_val + D.decimal_val
+
+    return BinaryNumber(result)
 
 
-    
-    
 def test_quadratic_multiply(x, y, f):
     start = time.time()
     # multiply two numbers x, y using function f
